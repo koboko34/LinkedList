@@ -162,6 +162,30 @@ public:
     {
         return size;
     }
+
+    LinkedList* Reverse()
+    {
+        if (size <= 1)
+        {
+            return this;
+        }
+        
+        Node* prev = nullptr;
+        current = head;
+        Node* next = current->next;
+        current->next = prev;
+
+        while (next != nullptr)
+        {
+            prev = current;
+            current = next;
+            next = current->next;
+            current->next = prev;
+        }
+        head = current;
+
+        return this;
+    }
 };
 
 int main()
@@ -189,6 +213,8 @@ int main()
     List.Remove(9);
 
     List.Push(40);
+
+    List.Reverse();
 
     for (int i = 0; i < List.size; i++)
     {
