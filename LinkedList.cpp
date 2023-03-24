@@ -58,6 +58,18 @@ public:
 
     void Insert(T data, int index)
     {
+        Node* adding = new Node();
+        adding->data = data;
+        
+        // if inserting as new head
+        if (index == 0)
+        {
+            adding->next = head;
+            head = adding;
+            size++;
+            return;
+        }
+        
         if (head == nullptr)
         {
             std::cout << "Head is null!\n";
@@ -70,19 +82,7 @@ public:
             return;
         }
 
-        Node* adding = new Node();
-        adding->data = data;
-
-        // if inserting as new head
-        if (index == 0)
-        {
-            adding->next = head;
-            head = adding;
-            size++;
-            return;
-        }
-
-        // if inserting as tail
+        // if inserting as body
         current = head;
         for (int i = 0; i < index - 1; i++)
         {
@@ -188,6 +188,218 @@ public:
     }
 };
 
+template <typename T>
+class DoublyLinkedList
+{
+    struct Node
+    {
+        T data;
+        Node* next;
+        Node* prev;
+
+        Node()
+        {
+            next = nullptr;
+        }
+    };
+
+    Node* head = nullptr;
+    Node* tail = nullptr;
+    Node* current = nullptr;
+
+public:
+
+    int size = 0;
+
+    void Push(T data)
+    {
+        Node* adding = new Node();
+        adding->data = data;
+
+        if (head == nullptr)
+        {
+            head = adding;
+            tail = adding;
+            size++;
+            return;
+        }
+
+        tail->next = adding;
+        adding->prev = tail;
+        tail = adding;
+        size++;
+    }
+
+    void Pop()
+    {
+        Node* newTail = tail->prev;
+        delete tail;
+        tail = newTail;
+        tail->next = nullptr;
+        size--;
+    }
+
+    void Insert(T data, int index)
+    {
+        Node* adding = new Node();
+        adding->data = data;
+        
+        // if inserting as new head
+        if (index == 0)
+        {
+            adding->next = head;
+            head->prev = adding;
+            head = adding;
+            if (size = 1)
+                tail = adding;
+            size++;
+            return;
+        }
+
+        if (index == size - 1)
+        {
+            Push(data);
+            return;
+        }
+        
+        if (head == nullptr || tail == nullptr)
+        {
+            std::cout << "Head/tail is null!\n";
+            return;
+        }
+        
+        if (index >= size)
+        {
+            std::cout << "Out of bounds!\n";
+            return;
+        }
+
+        // if index is in first half, traverse forward from head, otherwise traverse back from tail
+        if (size / 2 > index)
+        {
+            std::cout << "Forward traversal.\n";
+            current = head;
+            for (int i = 0; i < index - 1; i++)
+            {
+                current = current->next;
+            }
+        }
+        else
+        {
+            std::cout << "Backwards traversal.\n";
+            current = tail;
+            for (int i = size; i > index; i--)
+            {
+                current = current->prev;
+            }
+        }
+        
+        current->next->prev = adding;
+        adding->next = current->next;
+        adding->prev = current;
+        current->next = adding;
+        size++;
+    }
+
+    // to do
+    void Remove(int index)
+    {
+        Node* tail;
+
+        if (index == 0)
+        {
+            tail = head->next;
+            delete head;
+            head = tail;
+        }
+        
+        current = head;
+        for (int i = 0; i < index - 1; i++)
+        {
+            current = current->next;
+        }
+        tail = current->next->next;
+        delete current->next;
+        current->next = tail;
+        size--;
+    }
+
+    //to optimise for doubly linked list
+    int operator[](int index)
+    {
+        if (head == nullptr)
+        {
+            std::cout << "Head is null!\n";
+            return -1;
+        }
+        
+        if (index >= size)
+        {
+            std::cout << "Out of bounds!\n";
+            return -1;
+        }
+
+        current = head;
+
+        for (int i = 0; i < index; i++)
+        {
+            current = current->next;
+        }
+        
+        return current->data;
+    }
+
+    // to optimise for doubly linked list
+    int Find(T data)
+    {
+        current = head;
+        for (int i = 0; i < size; i++)
+        {
+            if (current->data == data)
+            {
+                return i;
+            }
+            current = current->next;
+        }
+        return -1;
+    }
+
+    int Length() const
+    {
+        return size;
+    }
+
+    int Size() const
+    {
+        return size;
+    }
+
+    // to do
+    DoublyLinkedList* Reverse()
+    {
+        if (size <= 1)
+        {
+            return this;
+        }
+        
+        Node* prev = nullptr;
+        current = head;
+        Node* next = current->next;
+        current->next = prev;
+
+        while (next != nullptr)
+        {
+            prev = current;
+            current = next;
+            next = current->next;
+            current->next = prev;
+        }
+        head = current;
+
+        return this;
+    }
+};
+
 int main()
 {
     LinkedList<int> List;
@@ -216,13 +428,39 @@ int main()
 
     List.Reverse();
 
+    std::cout << "\nSingly linked list tests:\n\n";
+
     for (int i = 0; i < List.size; i++)
     {
         std::cout << List[i] << std::endl;
     }
 
     std::cout << List.Find(27) << std::endl;
-    std::cout << "Length: " << List.Length() << std::endl;
+    std::cout << "Length: " << List.Length() << "\n\n";
+
+    std::cout << "Double linked list tests:\n\n";
+
+    DoublyLinkedList<int> DoubleList;
     
+    DoubleList.Push(10);
+    DoubleList.Push(11);
+    DoubleList.Push(12);
+    DoubleList.Push(13);
+    DoubleList.Push(14);
+    DoubleList.Push(15);
+    DoubleList.Push(16);
+    DoubleList.Push(17);
+
+    DoubleList.Pop();
+
+    DoubleList.Insert(24, 1);
+    DoubleList.Insert(25, 3);
+    DoubleList.Insert(26, 7);
+
+    for (int i = 0; i < DoubleList.size; i++)
+    {
+        std::cout << DoubleList[i] << std::endl;
+    }
+
     return 0;
 }
