@@ -191,6 +191,8 @@ public:
 template <typename T>
 class DoublyLinkedList
 {
+private:
+
     struct Node
     {
         T data;
@@ -206,6 +208,26 @@ class DoublyLinkedList
     Node* head = nullptr;
     Node* tail = nullptr;
     Node* current = nullptr;
+
+    void PrepIndex(int index)
+    {
+        if (size / 2 > index)
+        {
+            current = head;
+            for (int i = 0; i < index; i++)
+            {
+                current = current->next;
+            }
+        }
+        else
+        {
+            current = tail;
+            for (int i = size; i > index + 1; i--)
+            {
+                current = current->prev;
+            }
+        }
+    }
 
 public:
 
@@ -250,13 +272,13 @@ public:
             adding->next = head;
             head->prev = adding;
             head = adding;
-            if (size = 1)
+            if (size == 1)
                 tail = adding;
             size++;
             return;
         }
 
-        if (index == size - 1)
+        if (index == size)
         {
             Push(data);
             return;
@@ -277,7 +299,6 @@ public:
         // if index is in first half, traverse forward from head, otherwise traverse back from tail
         if (size / 2 > index)
         {
-            std::cout << "Forward traversal.\n";
             current = head;
             for (int i = 0; i < index - 1; i++)
             {
@@ -286,7 +307,6 @@ public:
         }
         else
         {
-            std::cout << "Backwards traversal.\n";
             current = tail;
             for (int i = size; i > index; i--)
             {
@@ -301,30 +321,16 @@ public:
         size++;
     }
 
-    // to do
     void Remove(int index)
     {
-        Node* tail;
+        PrepIndex(index);
 
-        if (index == 0)
-        {
-            tail = head->next;
-            delete head;
-            head = tail;
-        }
-        
-        current = head;
-        for (int i = 0; i < index - 1; i++)
-        {
-            current = current->next;
-        }
-        tail = current->next->next;
-        delete current->next;
-        current->next = tail;
+        current->prev->next = current->next;
+        current->next->prev = current->prev;
+        delete current;
         size--;
     }
 
-    //to optimise for doubly linked list
     int operator[](int index)
     {
         if (head == nullptr)
@@ -339,17 +345,11 @@ public:
             return -1;
         }
 
-        current = head;
-
-        for (int i = 0; i < index; i++)
-        {
-            current = current->next;
-        }
+        PrepIndex(index);
         
         return current->data;
     }
 
-    // to optimise for doubly linked list
     int Find(T data)
     {
         current = head;
@@ -382,20 +382,21 @@ public:
             return this;
         }
         
-        Node* prev = nullptr;
+        Node* newNext = nullptr;
         current = head;
-        Node* next = current->next;
-        current->next = prev;
+        tail = current;
+        current->prev = current->next;
+        current->next = newNext;
 
-        while (next != nullptr)
+        while (current->prev != nullptr)
         {
-            prev = current;
-            current = next;
-            next = current->next;
-            current->next = prev;
+            current = current->prev;
+            newNext = current->prev;
+            current->prev = current->next;
+            current->next = newNext;
         }
+        
         head = current;
-
         return this;
     }
 };
@@ -436,7 +437,7 @@ int main()
     }
 
     std::cout << List.Find(27) << std::endl;
-    std::cout << "Length: " << List.Length() << "\n\n";
+    std::cout << "\nLength: " << List.Length() << "\n\n";
 
     std::cout << "Double linked list tests:\n\n";
 
@@ -453,14 +454,27 @@ int main()
 
     DoubleList.Pop();
 
+    DoubleList.Remove(5);
+
     DoubleList.Insert(24, 1);
     DoubleList.Insert(25, 3);
     DoubleList.Insert(26, 7);
+
+    DoubleList.Reverse();
+    
+    DoubleList.Push(21);
+
+    DoubleList.Insert(30, 8);
+    DoubleList.Insert(40, 0);
 
     for (int i = 0; i < DoubleList.size; i++)
     {
         std::cout << DoubleList[i] << std::endl;
     }
+
+    std::cout << DoubleList.Find(14) << std::endl;
+
+    std::cout << "\nLength: " << DoubleList.Length() << "\n\n";
 
     return 0;
 }
